@@ -11,12 +11,7 @@
                        ░                     ░                     
 </pre>
 
-Code by {protocell:labs}, assets by jrdsctt
-For Glitch Forge, 2022
-.
-General sandbox repo info below:
-.
-.
+Code by {protocell:labs}, assets by jrdsctt. Developed for Glitch Forge, 2022. General sandbox repo info below:
 
 ## Getting Started
 
