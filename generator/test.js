@@ -3,6 +3,9 @@ import p5 from 'node-p5';
 import seedrandom from 'seedrandom';
 import fs from 'fs';
 
+
+
+
 async function run() {
   console.log("Setting up sketch: ");
   let randomSeed = Math.random() + ""
@@ -16,8 +19,8 @@ async function run() {
   const txn_hash = "ooY6b3EDUB6zprbAiSByj3MFbgkLvSlVz8GSxLC4a1Szwzf12Mw";
   const sketchCount = 1;
 
-  var assetPath = 'assets/'
-  var files = fs.readdirSync(assetPath)
+  var assetPath = 'assets/midjourney/'; // 'assets/'
+  var files = fs.readdirSync(assetPath);
   let assetFolders = files.filter(f => fs.lstatSync(assetPath + f).isDirectory() && !f.startsWith('.'));
   let assets = {}
   for (let af of assetFolders) {

@@ -3,11 +3,11 @@
 */
 
 /*
-  Given a point and line defined by two points, return the 
+  Given a point and line defined by two points, return the
   distance from the point to the line.
 
   A point is an POJO with x and y properties: {x: 0, y: 0}
-    
+
 */
 export function distancePoint2Line(p, lp1, lp2) {
   let dist = Math.abs((lp2.x - lp1.x) * (lp1.y - p.y) - (lp1.x - p.x) * (lp2.y - lp1.y)) / Math.sqrt((lp2.x - lp1.x) * (lp2.x - lp1.x) + (lp2.y - lp1.y) * (lp2.y - lp1.y));
@@ -81,7 +81,7 @@ export function colorIsMatched(c, idx) {
   }
 }
 /*
-  Given a color and a number n (0-255), increase the 
+  Given a color and a number n (0-255), increase the
   green value of the color by n, and reduce the red and blue values by n/2.
 
   Assumes RGB mode
@@ -93,7 +93,7 @@ export function greenify(color, n) {
 
 /*
   Given a color, assuming HSL mode, normalize the values to be
-  valid H, S, or L values. 
+  valid H, S, or L values.
 */
 export function normHSL(color) {
   // console.log("pre normeD: " + colors)
@@ -154,7 +154,7 @@ export function wAlpha(color, a) {
   return [color[0], color[1], color[2], a];
 }
 /*
-  Given two lines, get the intersection point 
+  Given two lines, get the intersection point
 
   This does not handle parallel lines or lines that are coincident.
 
@@ -367,8 +367,8 @@ export function randomListItem(list) {
 
 export async function getRandomImage(assets, asset_Dir, sketch) {
 
-  let currImgPath = "assets/" + asset_Dir + "/" + randomListItem(assets[asset_Dir])
-  console.log("currImgPath: " + currImgPath)
+  let currImgPath = "assets/midjourney/" + asset_Dir + "/" + randomListItem(assets[asset_Dir]); // "assets/" + asset_Dir + "/" + randomListItem(assets[asset_Dir])
+  console.log("currImgPath: " + currImgPath);
   let currImg = await sketch.loadImage(currImgPath);
   return currImg
 }
