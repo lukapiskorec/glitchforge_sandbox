@@ -118,7 +118,6 @@ export async function draw(sketch, assets) {
 
     // SELECTION OF SOURCE THEME
     let source_themes = ['citizen', 'cityscape', 'covers', 'scenes'];
-    let source_themes_size = [354, 290, 220, 46]; // 910 in total,  citizen 39%, cityscape 32%, covers 24%, scenes 5%
     let source_theme_weights = [ [0, 35], [1, 35], [2, 25], [3, 5] ]; // these represent probabilities for choosing a source theme number [element, probability]
     let source_theme_nr = weightedChoice(source_theme_weights, sketch); // 0 -> citizen, 1 -> cityscape, 2 -> covers, 3 -> scenes
     //let source_theme_nr = 1; // override for the source theme

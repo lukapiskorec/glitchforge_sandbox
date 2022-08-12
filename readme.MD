@@ -11,54 +11,44 @@
                        ░                     ░                     
 </pre>
 
-Code by {protocell:labs}, assets by jrdsctt. Developed for Glitch Forge, 2022. General sandbox repo info below:
+Code by {protocell:labs}, assets by jrdsctt. Developed for Glitch Forge, 2022.
 
-## Getting Started
+![Sample output](https://github.com/lukapiskorec/gltchvrs/blob/master/public/test_gif_730073.png?raw=true)
 
-Artists, you can fork this repo, or create your own branch in this repo. If you plan on contributing your glitch effects to the permanent library, it may be easier to create a branch in this repo...
+
+
+## Install
 
 ``git clone {me}``
 
 ```npm run dev```
 
-All the code you edit should be in `generator/`
-
-`generate.js` does the actual drawing to canvas, `assets/` is a folder of assets (load them via preload)
-
 ## Usage
 
-from the `generator/` directory run ```node test``` to make sure the shell is working. If you run from the main directory, it may not find your assets
-folder.
+From the `generator/` directory run ```node test``` to generate a single gif animation. It will be automatically saved in the `generator/` folder. To create multiple outputs at once, simply go to
+`generator/test.js` and modify the `sketchCount` variable. Then run `node test` as usual.
 
-`generate.js` is the primary driver. Run glitch effects from there and import whatever effects and utilities you need.
+## Output description
 
-## Adding Effects
+Output is a 5 frame gif animation, 1000x1000 pix, generated from a randomly selected asset image. All images are stored inside `generator\assets\midjourney` with subfolders corresponding to 4 different themes:
 
-If you add your own effects, create a new file named after your project of artist name like this:
-```
-./generator
-    effects.js
-    util.js
-    test.js
-    generate.js
-    MY-ADDED-EFFECTS.js
-```
+- citizen (35% chance)
+- cityscape (35% chance)
+- covers (25% chance)
+- scenes (5% chance)
 
-Keep your effects clean and reusable, and they may find their way into the permanent Glitchforge library for future use!
+Each image has a parametrized effect stack applied to it. There are 5 different effect stacks:
 
-Generic utilities like math formulas and can be added to `util.js`
+- monochrome dither (20% chance)
+- tinted dither (20% chance)
+- color dither + pixel sorting (20% chance)
+- pixel sorting + color dither (20% chance)
+- abstract dither (20% chance)
 
-Be careful when altering existing utility files like `effects.js` or `util.js`, so as not to break anything. You can fix functions to work better for your own project though. If you alter the logic drastically, consider making a new function altogether.
+Most notable generation parameters include:
 
-## Difference from p5.js
-
-In p5.js everything in p5.js is a global variable: `PI`, `circle()`, `line()`
-Our generator is outside the global scope of p5.js, so any p5.js variables
-and functions must be accessed via the sketch instance: `sketch.PI`,
-`sketch.circle()`, `sketch.line()`
-
-## Batch Testing
-To create multiple outputs at one for batch testing, simply go to
-generator/test.js and modify the `sketchCount` variable.
-
-Then run `node test` as usual
+- underlaying asset image (910 options)
+- effect stack type (5 options)
+- dither parameters (10 standard, 19 special)
+- 3-bit color palette (8 options)
+- pixel sorting mode, type and order (24 options)
