@@ -1,3 +1,6 @@
+![Sample output](https://github.com/lukapiskorec/gltchvrs/blob/master/public/test_gif_730073.gif?raw=true)
+
+
 <pre>
   ▄████  ██▓  ▄▄▄█████▓ ▄████▄   ██░ ██  ██▒   █▓ ██▀███    ██████
  ██▒ ▀█▒▓██▒  ▓  ██▒ ▓▒▒██▀ ▀█  ▓██░ ██▒▓██░   █▒▓██ ▒ ██▒▒██    ▒
@@ -12,11 +15,6 @@
 </pre>
 
 Code by {protocell:labs}, assets by jrdsctt. Developed for Glitch Forge, 2022.
-
-![Sample output](https://github.com/lukapiskorec/gltchvrs/blob/master/public/test_gif_730073.gif?raw=true)
-
-
-
 
 
 ## Install
