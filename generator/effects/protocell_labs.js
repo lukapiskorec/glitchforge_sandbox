@@ -3,8 +3,6 @@ const AUTHOR_TEZOS_ADDRESS = "tz1dUQZNCe18p9wMEqAyXvY5GocKWGsUfZHn" // protocell
 
 import GIFEncoder from 'gifencoder';
 import fs from 'fs';
-import pkg from 'canvas';
-const { createCanvas, loadImage } = pkg;
 
 
 /*
@@ -420,9 +418,7 @@ export async function animateTintedDither(img, image_border, animation_name, ske
   encoder.setDelay(frame_duration);  // frame delay in ms
   encoder.setQuality(10); // image quality. 10 is default.
 
-  // use node-canvas for creating frames that are fed into GIFEncoder
-  const canvas = createCanvas(img.width + image_border[0], img.height + image_border[1]);
-  const ctx = canvas.getContext('2d');
+  const ctx = sketch.canvas.getContext('2d');
 
   let image_url, image_data;
 
@@ -437,10 +433,6 @@ export async function animateTintedDither(img, image_border, animation_name, ske
 
   sketch.background(0);
   applyTintedDither(frame_1, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
   encoder.addFrame(ctx);
 
   contrast += contrast_delta[0] * delta_factor;
@@ -448,10 +440,6 @@ export async function animateTintedDither(img, image_border, animation_name, ske
 
   sketch.background(0);
   applyTintedDither(frame_2, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
   encoder.addFrame(ctx);
 
   contrast += contrast_delta[1] * delta_factor;
@@ -459,10 +447,6 @@ export async function animateTintedDither(img, image_border, animation_name, ske
 
   sketch.background(0);
   applyTintedDither(frame_3, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
   encoder.addFrame(ctx);
 
   contrast += contrast_delta[2] * delta_factor;
@@ -470,10 +454,6 @@ export async function animateTintedDither(img, image_border, animation_name, ske
 
   sketch.background(0);
   applyTintedDither(frame_4, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
   encoder.addFrame(ctx);
 
   contrast += contrast_delta[3] * delta_factor;
@@ -481,10 +461,6 @@ export async function animateTintedDither(img, image_border, animation_name, ske
 
   sketch.background(0);
   applyTintedDither(frame_5, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
   encoder.addFrame(ctx);
 
   // finish feeding frames and create GIF
