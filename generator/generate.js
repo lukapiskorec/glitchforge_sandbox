@@ -152,7 +152,7 @@ export async function draw(sketch, assets) {
         break;
 
       case 1: // Tinted dither
-        animateTintedDither(referenceGraphic, image_border, animation_name, sketch);
+        await animateTintedDither(referenceGraphic, image_border, animation_name, sketch);
         break;
 
       case 2: // Color dither + pixel sorting

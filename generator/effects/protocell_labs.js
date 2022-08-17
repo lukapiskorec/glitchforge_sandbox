@@ -62,7 +62,7 @@ export function applyMonochromeDither(img, image_border, new_brightness, contras
 
 // effect stack 1 -> Tinted dither
 export function applyTintedDither(img, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch) {
-
+  const st = Date.now();
   setBrightness(img, new_brightness, sketch);
   let img_2 = img.get(); // copy image pixels
 
@@ -87,6 +87,7 @@ export function applyTintedDither(img, image_border, new_brightness, contrast, p
 
   sketch.blendMode(sketch.BLEND);
   sketch.noTint();
+  console.log("applyTintedDither: "+(Date.now()-st));
 }
 
 
@@ -488,7 +489,6 @@ export async function animateTintedDither(img, image_border, animation_name, ske
 
   // finish feeding frames and create GIF
   encoder.finish();
-
 }
 
 
@@ -1242,19 +1242,19 @@ function getNextWhiteY(img, _x, _y, whiteValue, sketch) {
 // Applies Floyd-Steinberg dithering with steps+1 number of levels on an image
 export function makeDithered(img, steps, dither_params, sketch) {
   img.loadPixels();
+
   for (let y = 0; y < img.height; y += 1) {
     for (let x = 0; x < img.width; x += 1) {
-      let clr = getColorAtIndex(img, x, y, sketch);
-      let oldR = sketch.red(clr);
-      let oldG = sketch.green(clr);
-      let oldB = sketch.blue(clr);
-      let oldA = sketch.alpha(clr);
+      let [oldR, oldG, oldB, oldA] = getColorArrayAtIndex(img, x, y, sketch);
+
       let newR = closestStep(255, steps, oldR, sketch);
       let newG = closestStep(255, steps, oldG, sketch);
       let newB = closestStep(255, steps, oldB, sketch);
       let newA = closestStep(255, steps, oldA, sketch);
-      let newClr = sketch.color(newR, newG, newB, newA);
+
+      const newClr = [newR, newG, newB, newA];
       setColorAtIndex(img, x, y, newClr, sketch);
+
       let errR = oldR - newR;
       let errG = oldG - newG;
       let errB = oldB - newB;
@@ -1278,10 +1278,10 @@ function distributeError(img, x, y, errR, errG, errB, errA, sketch) {
 
 //Floyd-Steinberg dithering algorithm with varable parameters
 function distributeError_params(img, x, y, errR, errG, errB, errA, params, sketch) {
-  addError(img, params[0], x + 1, y, errR, errG, errB, errA, sketch);
-  addError(img, params[1], x - 1, y + 1, errR, errG, errB, errA, sketch);
-  addError(img, params[2], x, y + 1, errR, errG, errB, errA, sketch);
-  addError(img, params[3], x + 1, y + 1, errR, errG, errB, errA, sketch);
+  if (params[0] != 0) addError(img, params[0], x + 1, y, errR, errG, errB, errA, sketch);
+  if (params[1] != 0) addError(img, params[1], x - 1, y + 1, errR, errG, errB, errA, sketch);
+  if (params[2] != 0) addError(img, params[2], x, y + 1, errR, errG, errB, errA, sketch);
+  if (params[3] != 0) addError(img, params[3], x + 1, y + 1, errR, errG, errB, errA, sketch);
 }
 
 
@@ -1289,16 +1289,12 @@ function distributeError_params(img, x, y, errR, errG, errB, errA, params, sketc
 //of a pixel onto its neighboring pixels
 function addError(img, factor, x, y, errR, errG, errB, errA, sketch) {
   if (x < 0 || x >= img.width || y < 0 || y >= img.height) return;
-  let clr = getColorAtIndex(img, x, y, sketch);
-  let r = sketch.red(clr);
-  let g = sketch.green(clr);
-  let b = sketch.blue(clr);
-  let a = sketch.alpha(clr);
-  clr.setRed(r + errR * factor);
-  clr.setGreen(g + errG * factor);
-  clr.setBlue(b + errB * factor);
-  clr.setAlpha(a + errA * factor);
-  setColorAtIndex(img, x, y, clr, sketch);
+  let [r, g, b, a] = getColorArrayAtIndex(img, x, y, sketch);
+  r = r + errR * factor;
+  g = g + errG * factor;
+  b = b + errB * factor;
+  a = a + errA * factor;
+  setColorAtIndex(img, x, y, [r,g,b,a], sketch);
 }
 
 
@@ -1383,23 +1379,35 @@ function getColorAtIndex(img, x, y, sketch) {
   return sketch.color(red, green, blue, alpha);
 }
 
+// returns color of a pixel at coordinates (x,y)
+function getColorArrayAtIndex(img, x, y, sketch) {
+  let idx = imageIndex(img, x, y);
+  return img.pixels.slice(idx, idx+4);
+}
+
 // sets a color of a pixel at coordinates (x,y)
 function setColorAtIndex(img, x, y, clr, sketch) {
   let idx = imageIndex(img, x, y);
   let pix = img.pixels;
-  pix[idx] = sketch.red(clr);
-  pix[idx + 1] = sketch.green(clr);
-  pix[idx + 2] = sketch.blue(clr);
-  pix[idx + 3] = sketch.alpha(clr);
+
+  if (clr instanceof Array) {
+    pix[idx]     = clr[0];
+    pix[idx + 1] = clr[1];
+    pix[idx + 2] = clr[2];
+    pix[idx + 3] = clr[3];
+  } else {
+    pix[idx]     = sketch.red(clr);
+    pix[idx + 1] = sketch.green(clr);
+    pix[idx + 2] = sketch.blue(clr);
+    pix[idx + 3] = sketch.alpha(clr);
+  }
 }
 
 // Finds the closest step for a given value
 // The step 0 is always included, so the number of steps is actually steps + 1
-function closestStep(max, steps, value, sketch) {
-  return sketch.round(steps * value / max) * sketch.floor(max / steps);
+function closestStep(max, steps, value) {
+  return Math.round(steps * value / max) * Math.floor(max / steps);
 }
-
-
 
 // make image grayscale
 // adapted from https://github.com/kgjenkins/dither-dream
@@ -1407,16 +1415,12 @@ export function grayscale(img, contrast, sketch) {
   img.loadPixels();
   for (let y = 0; y < img.height; y++) {
     for (let x = 0; x < img.width; x++) {
-      let clr = getColorAtIndex(img, x, y, sketch);
-      let r = sketch.red(clr);
-      let g = sketch.green(clr);
-      let b = sketch.blue(clr);
-      let a = sketch.alpha(clr);
+      let [r, g, b, a] = getColorArrayAtIndex(img, x, y, sketch);
       // calculate greyscale following Rec 601 luma
       let v = (0.3*r + 0.58*g + 0.11*b) * a/255;
       //stretch to increase contrast
       v = v + (v-128)*contrast;
-      let newClr = sketch.color(v, v, v, a);
+      const newClr = [v,v,v,a];
       setColorAtIndex(img, x, y, newClr, sketch);
     }
   }
@@ -1429,16 +1433,12 @@ export function setContrast(img, contrast, sketch) {
   img.loadPixels();
   for (let y = 0; y < img.height; y++) {
     for (let x = 0; x < img.width; x++) {
-      let clr = getColorAtIndex(img, x, y, sketch);
-      let r = sketch.red(clr);
-      let g = sketch.green(clr);
-      let b = sketch.blue(clr);
-      let a = sketch.alpha(clr);
+      let [r, g, b, a] = getColorArrayAtIndex(img, x, y, sketch);
       //stretch to increase contrast
       r = r + (r-128)*contrast;
       g = g + (g-128)*contrast;
       b = b + (b-128)*contrast;
-      let newClr = sketch.color(r, g, b, a);
+      let newClr = [r, g, b, a];
       setColorAtIndex(img, x, y, newClr, sketch);
     }
   }
@@ -1450,11 +1450,7 @@ export function setBrightness(img, brightness, sketch) {
   img.loadPixels();
   for (let y = 0; y < img.height; y++) {
     for (let x = 0; x < img.width; x++) {
-      let clr = getColorAtIndex(img, x, y, sketch);
-      let r = sketch.red(clr);
-      let g = sketch.green(clr);
-      let b = sketch.blue(clr);
-      let a = sketch.alpha(clr);
+      let [r, g, b, a] = getColorArrayAtIndex(img, x, y, sketch);
       //multiply by the constant to change the brightness
       r = r * brightness;
       g = g * brightness;
@@ -1463,7 +1459,7 @@ export function setBrightness(img, brightness, sketch) {
       r = sketch.constrain(r, 0, 255);
       g = sketch.constrain(g, 0, 255);
       b = sketch.constrain(b, 0, 255);
-      let newClr = sketch.color(r, g, b, a);
+      let newClr = [r,g,b,a];
       setColorAtIndex(img, x, y, newClr, sketch);
     }
   }
@@ -1492,17 +1488,13 @@ export function brightnessMask(img, contrast, treshold, invert = false, sketch) 
   img.loadPixels();
   for (let y = 0; y < img.height; y++) {
     for (let x = 0; x < img.width; x++) {
-      let clr = getColorAtIndex(img, x, y, sketch);
-      let r = sketch.red(clr);
-      let g = sketch.green(clr);
-      let b = sketch.blue(clr);
-      let a = sketch.alpha(clr);
+      let [r, g, b, a] = getColorArrayAtIndex(img, x, y, sketch);
       // calculate greyscale following Rec 601 luma
       let v = (0.3*r + 0.58*g + 0.11*b) * a/255;
       // stretch to increase contrast
       v = v + (v-128)*contrast;
-      let newAlpha = sketch.brightness(clr) > treshold ? 255*!invert : 255*invert;
-      let newClr = sketch.color(r, g, b, newAlpha);
+      let newAlpha = sketch.brightness(sketch.color(r,g,b,a)) > treshold ? 255*!invert : 255*invert;
+      let newClr = [r,g,b,newAlpha];
       setColorAtIndex(img, x, y, newClr, sketch);
     }
   }
