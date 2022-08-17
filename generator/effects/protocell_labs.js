@@ -420,48 +420,16 @@ export async function animateTintedDither(img, image_border, animation_name, ske
 
   const ctx = sketch.canvas.getContext('2d');
 
-  let image_url, image_data;
-
-  // make source image copies
-  let frame_1 = img.get();
-  let frame_2 = img.get();
-  let frame_3 = img.get();
-  let frame_4 = img.get();
-  let frame_5 = img.get();
-
   // apply effects to individual frames and add them to the gif animation
+  for (let i = 0; i < 5; i++) {
+    const frame = img.get();
+    sketch.background(0);
+    applyTintedDither(frame, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
+    encoder.addFrame(ctx);
 
-  sketch.background(0);
-  applyTintedDither(frame_1, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[0] * delta_factor;
-  new_brightness += brightness_delta[0] * delta_factor;
-
-  sketch.background(0);
-  applyTintedDither(frame_2, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[1] * delta_factor;
-  new_brightness += brightness_delta[1] * delta_factor;
-
-  sketch.background(0);
-  applyTintedDither(frame_3, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[2] * delta_factor;
-  new_brightness += brightness_delta[2] * delta_factor;
-
-  sketch.background(0);
-  applyTintedDither(frame_4, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[3] * delta_factor;
-  new_brightness += brightness_delta[3] * delta_factor;
-
-  sketch.background(0);
-  applyTintedDither(frame_5, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
-  encoder.addFrame(ctx);
+    contrast += contrast_delta[i] * delta_factor;
+    new_brightness += brightness_delta[i] * delta_factor;
+  }
 
   // finish feeding frames and create GIF
   encoder.finish();
