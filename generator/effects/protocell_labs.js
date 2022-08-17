@@ -1493,7 +1493,8 @@ export function brightnessMask(img, contrast, treshold, invert = false, sketch) 
       let v = (0.3*r + 0.58*g + 0.11*b) * a/255;
       // stretch to increase contrast
       v = v + (v-128)*contrast;
-      let newAlpha = sketch.brightness(sketch.color(r,g,b,a)) > treshold ? 255*!invert : 255*invert;
+      let brightness = v / 255 * 100;
+      let newAlpha = brightness > treshold ? 255*!invert : 255*invert;;
       let newClr = [r,g,b,newAlpha];
       setColorAtIndex(img, x, y, newClr, sketch);
     }
