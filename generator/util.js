@@ -365,10 +365,13 @@ export function randomListItem(list) {
   Gets a random image from an asset directory
 */
 
-export async function getRandomImage(assets, asset_Dir, sketch) {
 
-  let currImgPath = "assets/midjourney/" + asset_Dir + "/" + randomListItem(assets[asset_Dir]); // "assets/" + asset_Dir + "/" + randomListItem(assets[asset_Dir])
-  console.log("currImgPath: " + currImgPath);
+export function getRandomImagePath(assets, asset_Dir, sketch) {
+  return "assets/midjourney/" + asset_Dir + "/" + randomListItem(assets[asset_Dir]); // "assets/" + asset_Dir + "/" + randomListItem(assets[asset_Dir])
+}
+
+export async function getRandomImage(assets, asset_Dir, sketch) {
+  let currImgPath = getRandomImagePath(assets, asset_Dir, sketch);
   let currImg = await sketch.loadImage(currImgPath);
   return currImg
 }
