@@ -21,11 +21,6 @@ import { calculateRoyalties } from "./royalties.js";
 import { sliceFrame, init as eInit } from "./effects/tartaria.js";
 import { weightedChoice, animateMonochromeDither, animateTintedDither, animateDitherSorting, animateSortingDither, animateAbstractDither } from "./effects/protocell_labs.js";
 
-import GIFEncoder from 'gifencoder';
-import fs from 'fs';
-import pkg from 'canvas';
-const { createCanvas, loadImage } = pkg;
-
 var r; //assign random hash access
 var WIDTH; var HEIGHT;
 var random = null;
