@@ -1,7 +1,6 @@
 import { addAuthorRoyalties } from "../royalties.js"
 const AUTHOR_TEZOS_ADDRESS = "tz1dUQZNCe18p9wMEqAyXvY5GocKWGsUfZHn" // protocell.tez
 
-import GIFEncoder from 'gifencoder';
 import fs from 'fs';
 
 
@@ -271,11 +270,7 @@ export function applyAbstractDither(img, image_border, new_brightness, contrast,
 // MAKE GIF ANIMATION
 
 // create 5 frame animation using monochrome dither effect stack
-export async function animateMonochromeDither(img, image_border, animation_name, sketch) {
-
-  // Custom stack params
-  let frame_duration = 100; // in mms
-
+export async function animateMonochromeDither(img, image_border, sketch) {
   let nr_of_levels = 1;
   let contrast = 0.15;
   let rand_dither_key_1 = getRandomKey(dither_params_json, sketch);
@@ -300,95 +295,23 @@ export async function animateMonochromeDither(img, image_border, animation_name,
   let contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
   let brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-  // GIF creation using GIFEncoder
-  let encoder = new GIFEncoder(img.width + image_border[0], img.height + image_border[1]);
-  encoder.createReadStream().pipe(fs.createWriteStream(animation_name)); // stream the results as they are available into a gif file
+  for (let i = 0; i < 5; i++) {
+    // For parallelization.  We run the contrast/new_brightness update each time to mimic original loop,
+    // but only actually generate the requested frame
+    if (frameNum == i) {
+      const frame = img.get();
+      sketch.background(0);
+      applyMonochromeDither(frame, image_border, new_brightness, contrast, pix_scaling, pix_scaling_dark, nr_of_levels, dither_params_1, dither_params_2, dither_params_3, mask_contrast, light_treshold, dark_treshold, invert_mask, tint_palette, layer_shift, sketch);
+    }
 
-  // set animation parameters
-  encoder.start();
-  encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
-  encoder.setDelay(frame_duration);  // frame delay in ms
-  encoder.setQuality(10); // image quality. 10 is default.
-
-  // use node-canvas for creating frames that are fed into GIFEncoder
-  const canvas = createCanvas(img.width + image_border[0], img.height + image_border[1]);
-  const ctx = canvas.getContext('2d');
-
-  let image_url, image_data;
-
-  // make source image copies
-  let frame_1 = img.get();
-  let frame_2 = img.get();
-  let frame_3 = img.get();
-  let frame_4 = img.get();
-  let frame_5 = img.get();
-
-  // apply effects to individual frames and add them to the gif animation
-
-  sketch.background(0);
-  applyMonochromeDither(frame_1, image_border, new_brightness, contrast, pix_scaling, pix_scaling_dark, nr_of_levels, dither_params_1, dither_params_2, dither_params_3, mask_contrast, light_treshold, dark_treshold, invert_mask, tint_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[0] * delta_factor;
-  new_brightness += brightness_delta[0] * delta_factor;
-
-  sketch.background(0);
-  applyMonochromeDither(frame_2, image_border, new_brightness, contrast, pix_scaling, pix_scaling_dark, nr_of_levels, dither_params_1, dither_params_2, dither_params_3, mask_contrast, light_treshold, dark_treshold, invert_mask, tint_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[1] * delta_factor;
-  new_brightness += brightness_delta[1] * delta_factor;
-
-  sketch.background(0);
-  applyMonochromeDither(frame_3, image_border, new_brightness, contrast, pix_scaling, pix_scaling_dark, nr_of_levels, dither_params_1, dither_params_2, dither_params_3, mask_contrast, light_treshold, dark_treshold, invert_mask, tint_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[2] * delta_factor;
-  new_brightness += brightness_delta[2] * delta_factor;
-
-  sketch.background(0);
-  applyMonochromeDither(frame_4, image_border, new_brightness, contrast, pix_scaling, pix_scaling_dark, nr_of_levels, dither_params_1, dither_params_2, dither_params_3, mask_contrast, light_treshold, dark_treshold, invert_mask, tint_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[3] * delta_factor;
-  new_brightness += brightness_delta[3] * delta_factor;
-
-  sketch.background(0);
-  applyMonochromeDither(frame_5, image_border, new_brightness, contrast, pix_scaling, pix_scaling_dark, nr_of_levels, dither_params_1, dither_params_2, dither_params_3, mask_contrast, light_treshold, dark_treshold, invert_mask, tint_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  // finish feeding frames and create GIF
-  encoder.finish();
-
+    contrast += contrast_delta[i] * delta_factor;
+    new_brightness += brightness_delta[i] * delta_factor;
+  }
 }
 
 
 // create 5 frame animation using tinted dither effect stack
-export async function animateTintedDither(img, image_border, animation_name, sketch) {
-
-  // Custom stack params
-  let frame_duration = 100; // in mms
-
+export async function animateTintedDither(img, image_border, sketch, frameNum) {
   let nr_of_levels = 1;
   let contrast = 0.25;
   let rand_dither_key_1 = getRandomKey(dither_params_json, sketch);
@@ -408,41 +331,25 @@ export async function animateTintedDither(img, image_border, animation_name, ske
   let contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
   let brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-  // GIF creation using GIFEncoder
-  let encoder = new GIFEncoder(img.width + image_border[0], img.height + image_border[1]);
-  encoder.createReadStream().pipe(fs.createWriteStream(animation_name)); // stream the results as they are available into a gif file
 
-  // set animation parameters
-  encoder.start();
-  encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
-  encoder.setDelay(frame_duration);  // frame delay in ms
-  encoder.setQuality(10); // image quality. 10 is default.
-
-  const ctx = sketch.canvas.getContext('2d');
-
-  // apply effects to individual frames and add them to the gif animation
   for (let i = 0; i < 5; i++) {
-    const frame = img.get();
-    sketch.background(0);
-    applyTintedDither(frame, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
-    encoder.addFrame(ctx);
+    // For parallelization.  We run the contrast/new_brightness update each time to mimic original loop,
+    // but only actually generate the requested frame
+    if (frameNum == i) {
+      const frame = img.get();
+      sketch.background(0);
+      applyTintedDither(frame, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
+    }
 
     contrast += contrast_delta[i] * delta_factor;
     new_brightness += brightness_delta[i] * delta_factor;
   }
-
-  // finish feeding frames and create GIF
-  encoder.finish();
 }
 
 
 
 // create 5 frame animation using color dither + pixel sorting effect stack
-export async function animateDitherSorting(img, image_border, animation_name, sketch) {
-
-  // Custom stack params
-  let frame_duration = 100; // in mms
-
+export async function animateDitherSorting(img, image_border, sketch) {
   let blackValue = 10;
   let brigthnessValue = 50;
   let whiteValue = 70;
@@ -472,96 +379,25 @@ export async function animateDitherSorting(img, image_border, animation_name, sk
   let contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
   let brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-  // GIF creation using GIFEncoder
-  let encoder = new GIFEncoder(img.width + image_border[0], img.height + image_border[1]);
-  encoder.createReadStream().pipe(fs.createWriteStream(animation_name)); // stream the results as they are available into a gif file
 
-  // set animation parameters
-  encoder.start();
-  encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
-  encoder.setDelay(frame_duration);  // frame delay in ms
-  encoder.setQuality(10); // image quality. 10 is default.
+  for (let i = 0; i < 5; i++) {
+    // For parallelization.  We run the contrast/new_brightness update each time to mimic original loop,
+    // but only actually generate the requested frame
+    if (frameNum == i) {
+      const frame = img.get();
+      sketch.background(0);
+      applyDitherSorting(frame, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tinting_mode, three_bit_palette, layer_shift, sketch);
+    }
 
-  // use node-canvas for creating frames that are fed into GIFEncoder
-  const canvas = createCanvas(img.width + image_border[0], img.height + image_border[1]);
-  const ctx = canvas.getContext('2d');
-
-  let image_url, image_data;
-
-  // make source image copies
-  let frame_1 = img.get();
-  let frame_2 = img.get();
-  let frame_3 = img.get();
-  let frame_4 = img.get();
-  let frame_5 = img.get();
-
-  // apply effects to individual frames and add them to the gif animation
-
-  sketch.background(0);
-  applyDitherSorting(frame_1, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tinting_mode, three_bit_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[0] * delta_factor;
-  new_brightness += brightness_delta[0] * delta_factor;
-
-  sketch.background(0);
-  applyDitherSorting(frame_2, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tinting_mode, three_bit_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[1] * delta_factor;
-  new_brightness += brightness_delta[1] * delta_factor;
-
-  sketch.background(0);
-  applyDitherSorting(frame_3, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tinting_mode, three_bit_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[2] * delta_factor;
-  new_brightness += brightness_delta[2] * delta_factor;
-
-  sketch.background(0);
-  applyDitherSorting(frame_4, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tinting_mode, three_bit_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[3] * delta_factor;
-  new_brightness += brightness_delta[3] * delta_factor;
-
-  sketch.background(0);
-  applyDitherSorting(frame_5, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tinting_mode, three_bit_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  // finish feeding frames and create GIF
-  encoder.finish();
-
+    contrast += contrast_delta[i] * delta_factor;
+    new_brightness += brightness_delta[i] * delta_factor;
+  }
 }
 
 
 
 // create 5 frame animation using pixel sorting + color dither effect stack
-export async function animateSortingDither(img, image_border, animation_name, sketch) {
-
-  // Custom stack params
-  let frame_duration = 100; // in mms
-
+export async function animateSortingDither(img, image_border, sketch) {
   let blackValue = 10;
   let brigthnessValue = 50;
   let whiteValue = 70;
@@ -591,97 +427,25 @@ export async function animateSortingDither(img, image_border, animation_name, sk
   let contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
   let brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-  // GIF creation using GIFEncoder
-  let encoder = new GIFEncoder(img.width + image_border[0], img.height + image_border[1]);
-  encoder.createReadStream().pipe(fs.createWriteStream(animation_name)); // stream the results as they are available into a gif file
+  for (let i = 0; i < 5; i++) {
+    // For parallelization.  We run the contrast/new_brightness update each time to mimic original loop,
+    // but only actually generate the requested frame
+    if (frameNum == i) {
+      const frame = img.get();
+      sketch.background(0);
+      applySortingDither(frame, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tinting_mode, three_bit_palette, layer_shift, sketch);
+    }
 
-  // set animation parameters
-  encoder.start();
-  encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
-  encoder.setDelay(frame_duration);  // frame delay in ms
-  encoder.setQuality(10); // image quality. 10 is default.
-
-  // use node-canvas for creating frames that are fed into GIFEncoder
-  const canvas = createCanvas(img.width + image_border[0], img.height + image_border[1]);
-  const ctx = canvas.getContext('2d');
-
-  let image_url, image_data;
-
-  // make source image copies
-  let frame_1 = img.get();
-  let frame_2 = img.get();
-  let frame_3 = img.get();
-  let frame_4 = img.get();
-  let frame_5 = img.get();
-
-  // apply effects to individual frames and add them to the gif animation
-
-  sketch.background(0);
-  applySortingDither(frame_1, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tinting_mode, three_bit_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[0] * delta_factor;
-  new_brightness += brightness_delta[0] * delta_factor;
-
-  sketch.background(0);
-  applySortingDither(frame_2, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tinting_mode, three_bit_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[1] * delta_factor;
-  new_brightness += brightness_delta[1] * delta_factor;
-
-  sketch.background(0);
-  applySortingDither(frame_3, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tinting_mode, three_bit_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[2] * delta_factor;
-  new_brightness += brightness_delta[2] * delta_factor;
-
-  sketch.background(0);
-  applySortingDither(frame_4, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tinting_mode, three_bit_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[3] * delta_factor;
-  new_brightness += brightness_delta[3] * delta_factor;
-
-  sketch.background(0);
-  applySortingDither(frame_5, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tinting_mode, three_bit_palette, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  // finish feeding frames and create GIF
-  encoder.finish();
-
+    contrast += contrast_delta[i] * delta_factor;
+    new_brightness += brightness_delta[i] * delta_factor;
+  }
 }
 
 
 
 
 // create 5 frame animation using abstract dither effect stack
-export async function animateAbstractDither(img, image_border, animation_name, sketch) {
-
-  // Custom stack params
-  let frame_duration = 100; // in mms
-
+export async function animateAbstractDither(img, image_border, sketch) {
   let blackValue = 10;
   let brigthnessValue = 50;
   let whiteValue = 70;
@@ -725,86 +489,19 @@ export async function animateAbstractDither(img, image_border, animation_name, s
   let contrast_delta = animation_params['contrast t1']; // values from this list will be added to the contrast for each frame
   let brightness_delta = animation_params['brightness t1']; // values from this list will be added to the brightness for each frame
 
-  // GIF creation using GIFEncoder
-  let encoder = new GIFEncoder(img.width + image_border[0], img.height + image_border[1]);
-  encoder.createReadStream().pipe(fs.createWriteStream(animation_name)); // stream the results as they are available into a gif file
 
-  // set animation parameters
-  encoder.start();
-  encoder.setRepeat(0);   // 0 for repeat, -1 for no-repeat
-  encoder.setDelay(frame_duration);  // frame delay in ms
-  encoder.setQuality(10); // image quality. 10 is default.
+  for (let i = 0; i < 5; i++) {
+    // For parallelization.  We run the contrast/new_brightness update each time to mimic original loop,
+    // but only actually generate the requested frame
+    if (frameNum == i) {
+      const frame = img.get();
+      sketch.background(0);
+      applyAbstractDither(frame, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, layer_shift, sketch);
+    }
 
-  // use node-canvas for creating frames that are fed into GIFEncoder
-  const canvas = createCanvas(img.width + image_border[0], img.height + image_border[1]);
-  const ctx = canvas.getContext('2d');
-
-  let image_url, image_data;
-
-  // make source image copies
-  let frame_1 = img.get();
-  let frame_2 = img.get();
-  let frame_3 = img.get();
-  let frame_4 = img.get();
-  let frame_5 = img.get();
-
-  // apply effects to individual frames and add them to the gif animation
-
-  sketch.background(0);
-  applyAbstractDither(frame_1, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[0] * delta_factor;
-  new_brightness += brightness_delta[0] * delta_factor;
-
-  sketch.background(0);
-  applyAbstractDither(frame_2, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[1] * delta_factor;
-  new_brightness += brightness_delta[1] * delta_factor;
-
-  sketch.background(0);
-  applyAbstractDither(frame_3, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[2] * delta_factor;
-  new_brightness += brightness_delta[2] * delta_factor;
-
-  sketch.background(0);
-  applyAbstractDither(frame_4, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  contrast += contrast_delta[3] * delta_factor;
-  new_brightness += brightness_delta[3] * delta_factor;
-
-  sketch.background(0);
-  applyAbstractDither(frame_5, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, layer_shift, sketch);
-
-  image_url = sketch.getCanvasDataURL(sketch);
-  image_data = await loadImage(image_url);
-  ctx.drawImage(image_data, 0, 0);
-  encoder.addFrame(ctx);
-
-  // finish feeding frames and create GIF
-  encoder.finish();
-
+    contrast += contrast_delta[i] * delta_factor;
+    new_brightness += brightness_delta[i] * delta_factor;
+  }
 }
 
 

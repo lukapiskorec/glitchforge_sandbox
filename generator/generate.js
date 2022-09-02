@@ -16,7 +16,7 @@ for Glitch Forge, 2022
 
 */
 
-import { getRandomImage } from "./util.js";
+import { getRandomImagePath } from "./util.js";
 import { calculateRoyalties } from "./royalties.js";
 import { sliceFrame, init as eInit } from "./effects/tartaria.js";
 import { weightedChoice, animateMonochromeDither, animateTintedDither, animateDitherSorting, animateSortingDither, animateAbstractDither } from "./effects/protocell_labs.js";
@@ -49,7 +49,47 @@ export function getMetadata() {
   return {
     "features": features,
     "royalties": royalties
-  }
+  };
+}
+
+export function getGeneratorConfig(assets) {
+  // SELECTION OF EFFECTS STACK
+  // 0 -> Monochrome dither
+  // 1 -> Tinted dither
+  // 2 -> Color dither + pixel sorting
+  // 3 -> Pixel sorting + color dither
+  // 4 -> Abstract dither
+
+  // Looks like the only thing we're passing sketch around for is the random func...
+  const fakeSketch = { random: random };
+
+  let effects_stack_weights = [ [0, 20], [1, 20], [2, 20], [3, 20], [4, 20] ]; // these represent probabilities for choosing an effects stack number [element, probability]
+  let effects_stack_type = weightedChoice(effects_stack_weights, fakeSketch); // type of effects workflow to be used as a number, 0-4
+  //let effects_stack_type = 4; // override for the type of effects workflow to be used as a number, 0-4
+
+  // SELECTION OF SOURCE THEME
+  let source_themes = ['citizen', 'cityscape', 'covers', 'scenes'];
+  let source_theme_weights = [ [0, 35], [1, 35], [2, 25], [3, 5] ]; // these represent probabilities for choosing a source theme number [element, probability]
+  let source_theme_nr = weightedChoice(source_theme_weights, fakeSketch); // 0 -> citizen, 1 -> cityscape, 2 -> covers, 3 -> scenes
+  //let source_theme_nr = 1; // override for the source theme
+  let source_theme = source_themes[source_theme_nr]; // 'citizen', 'cityscape', 'covers', 'scenes'
+
+  // EXCEPTIONS - these skew the choice probabilities from above
+  if (effects_stack_type == 4) {source_theme_nr = 0}; // Abstract dither effect stack works only with citizen theme
+
+  let imagePath = getRandomImagePath(assets, source_theme);
+
+  return {
+    type: 'gif',
+    frames: 5,
+    frameRate: 10,
+    parallel: false,
+    params: {
+      // effects_stack_type: effects_stack_type,
+      effects_stack_type: 1,
+      image: imagePath,
+    }
+  };
 }
 
 /*
@@ -76,16 +116,12 @@ function applyMask(source, target) {
 }
 
 
-
-
-
-
 // Receives:
 // sketch: a p5js instance
 // txn_hash: the transaction hash that minted this nft (faked in sandbox)
 // random: a function to replace Math.random() (based on txn_hash)
 // assets: an object with preloaded image assets from `export getAssets`, keyname --> asset
-export async function draw(sketch, assets) {
+export async function draw(sketch, assets, params) {
   let startmilli = Date.now();
 
   //Fixed Canvas Size, change as needed
@@ -101,38 +137,15 @@ export async function draw(sketch, assets) {
   let sketch_canvas = sketch.createCanvas(WIDTH + image_border[0], HEIGHT + image_border[1]);
   try {
 
-    // SELECTION OF EFFECTS STACK
-    // 0 -> Monochrome dither
-    // 1 -> Tinted dither
-    // 2 -> Color dither + pixel sorting
-    // 3 -> Pixel sorting + color dither
-    // 4 -> Abstract dither
-
-    let animation_name = 'gltchvrs_' + Math.floor(Math.random() * 10000) + '.gif';
-
-    let effects_stack_weights = [ [0, 20], [1, 20], [2, 20], [3, 20], [4, 20] ]; // these represent probabilities for choosing an effects stack number [element, probability]
-    let effects_stack_type = weightedChoice(effects_stack_weights, sketch); // type of effects workflow to be used as a number, 0-4
-    //let effects_stack_type = 4; // override for the type of effects workflow to be used as a number, 0-4
-    let effects_stack_names = ['monochrome dither', 'tinted dither', 'color dither + pixel sorting', 'pixel sorting + color dither', 'abstract dither']; // type of effects workflow to be used as a string
-    let effects_stack_name = effects_stack_names[effects_stack_type]; // type of effects workflow to be used as a string
-
-    // SELECTION OF SOURCE THEME
-    let source_themes = ['citizen', 'cityscape', 'covers', 'scenes'];
-    let source_theme_weights = [ [0, 35], [1, 35], [2, 25], [3, 5] ]; // these represent probabilities for choosing a source theme number [element, probability]
-    let source_theme_nr = weightedChoice(source_theme_weights, sketch); // 0 -> citizen, 1 -> cityscape, 2 -> covers, 3 -> scenes
-    //let source_theme_nr = 1; // override for the source theme
-    let source_theme = source_themes[source_theme_nr]; // 'citizen', 'cityscape', 'covers', 'scenes'
-
-    // EXCEPTIONS - these skew the choice probabilities from above
-    if (effects_stack_type == 4) {source_theme_nr = 0}; // Abstract dither effect stack works only with citizen theme
 
     /*
      Make a copy of the raw image for reference.
      If the raw image is too large, a random section is chosen to match our fixed canvas size.
     */
     let referenceGraphic = sketch.createImage(WIDTH, HEIGHT);
+    let imagePath = params.image;
+    let image = await sketch.loadImage(imagePath);
 
-    let image = await getRandomImage(assets, source_theme, sketch)
     const copyStartX = Math.floor(random() * (image.width - WIDTH));
     const copyStartY = Math.floor(random() * (image.height - HEIGHT));
 
@@ -141,36 +154,9 @@ export async function draw(sketch, assets) {
 
 
     /***********IMAGE MANIPULATION GOES HERE**********/
-
-
-    // THE MAIN EFFECT STACK SWITCH
-
-    switch(effects_stack_type) {
-
-      case 0: // Monochrome dither
-        animateMonochromeDither(referenceGraphic, image_border, animation_name, sketch);
-        break;
-
-      case 1: // Tinted dither
-        await animateTintedDither(referenceGraphic, image_border, animation_name, sketch);
-        break;
-
-      case 2: // Color dither + pixel sorting
-        animateDitherSorting(referenceGraphic, image_border, animation_name, sketch);
-        break;
-
-      case 3: // Pixel sorting + color dither
-        animateSortingDither(referenceGraphic, image_border, animation_name, sketch);
-        break;
-
-      case 4: // Abstract dither
-        animateAbstractDither(referenceGraphic, image_border, animation_name, sketch);
-        break;
-
-      default:
-        break;
-
-      }
+    const effects = [ animateMonochromeDither, animateTintedDither, animateDitherSorting, animateSortingDither, animateAbstractDither ];
+    const effects_stack_type = params.effects_stack_type;
+    await effects[effects_stack_type](referenceGraphic, image_border, sketch, params.frame);
 
     /***********IMAGE MANIPULATION ENDS HERE**********/
 
@@ -186,7 +172,7 @@ export async function draw(sketch, assets) {
 
 
     //Saves the image for test review: Remove from production
-    //sketch.saveCanvas(sketch, "" + Math.floor(Math.random() * 10000), 'png');
+    // sketch.saveCanvas(sketch, "frame-" + Math.floor(Math.random() * 10000), 'png');
 
 
 
