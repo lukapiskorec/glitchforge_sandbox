@@ -270,7 +270,7 @@ export function applyAbstractDither(img, image_border, new_brightness, contrast,
 // MAKE GIF ANIMATION
 
 // create 5 frame animation using monochrome dither effect stack
-export async function animateMonochromeDither(img, image_border, sketch) {
+export async function animateMonochromeDither(img, image_border, sketch, frameNum) {
   let nr_of_levels = 1;
   let contrast = 0.15;
   let rand_dither_key_1 = getRandomKey(dither_params_json, sketch);
@@ -349,7 +349,7 @@ export async function animateTintedDither(img, image_border, sketch, frameNum) {
 
 
 // create 5 frame animation using color dither + pixel sorting effect stack
-export async function animateDitherSorting(img, image_border, sketch) {
+export async function animateDitherSorting(img, image_border, sketch, frameNum) {
   let blackValue = 10;
   let brigthnessValue = 50;
   let whiteValue = 70;
@@ -397,7 +397,7 @@ export async function animateDitherSorting(img, image_border, sketch) {
 
 
 // create 5 frame animation using pixel sorting + color dither effect stack
-export async function animateSortingDither(img, image_border, sketch) {
+export async function animateSortingDither(img, image_border, sketch, frameNum) {
   let blackValue = 10;
   let brigthnessValue = 50;
   let whiteValue = 70;
@@ -445,7 +445,7 @@ export async function animateSortingDither(img, image_border, sketch) {
 
 
 // create 5 frame animation using abstract dither effect stack
-export async function animateAbstractDither(img, image_border, sketch) {
+export async function animateAbstractDither(img, image_border, sketch, frameNum) {
   let blackValue = 10;
   let brigthnessValue = 50;
   let whiteValue = 70;
