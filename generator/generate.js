@@ -85,8 +85,7 @@ export function getGeneratorConfig(assets) {
     frameRate: 10,
     parallel: false,
     params: {
-      // effects_stack_type: effects_stack_type,
-      effects_stack_type: 1,
+      effects_stack_type: effects_stack_type,
       image: imagePath,
     }
   };
