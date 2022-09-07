@@ -56,7 +56,27 @@ export function getGeneratorConfig(assets) {
   // 4 -> Abstract dither
 
   // Looks like the only thing we're passing sketch around for is the random func...
-  const fakeSketch = { random: random };
+  const fakeSketch = { random: (min, max) => {
+      // Copied from p5js, just stubbing it here.
+      const rand = random();
+      if (typeof min === 'undefined') {
+        return rand;
+      } else if (typeof max === 'undefined') {
+        if (min instanceof Array) {
+          return min[Math.floor(rand * min.length)];
+        } else {
+          return rand * min;
+        }
+      } else {
+        if (min > max) {
+          const tmp = min;
+          min = max;
+          max = tmp;
+        }
+        return rand * (max - min) + min;
+      }
+    }
+  };
 
   let effects_stack_weights = [ [0, 20], [1, 20], [2, 20], [3, 20], [4, 20] ]; // these represent probabilities for choosing an effects stack number [element, probability]
   let effects_stack_type = weightedChoice(effects_stack_weights, fakeSketch); // type of effects workflow to be used as a number, 0-4
