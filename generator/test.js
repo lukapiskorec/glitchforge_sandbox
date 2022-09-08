@@ -19,7 +19,7 @@ function getRandomGenerator() {
 }
 
 function getAssetList() {
-  var assetPath = 'assets/midjourney/'; // 'assets/'
+  var assetPath = 'assets/'; // 'assets/'
   var files = fs.readdirSync(assetPath);
   const assetFolders = files.filter(f => fs.lstatSync(assetPath + f).isDirectory() && !f.startsWith('.'));
   const assets = {}
