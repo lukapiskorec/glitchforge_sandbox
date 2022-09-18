@@ -11,7 +11,7 @@ function getRandomSeed() {
   // Use either for testing...
   let randomSeed = Math.random() + ""
   let constantSeed = "ADSFSEED"
-  return constantSeed;
+  return randomSeed;
 }
 
 function getRandomGenerator() {

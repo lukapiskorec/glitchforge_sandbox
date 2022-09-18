@@ -35,10 +35,13 @@ export function init(rnd, txn_hash) {
 
 // Guaranteed to be called after setup(), can build features during setup
 // Add your rarity traits and attributes to the features object
-const features = {};
+export const features = {}; // export features so they can be used / filled in other files as well
 export function getFeatures() {
   return features;
 }
+
+// export features so they can be used / filled in protocell_labs.js
+// export { features };
 
 export function getMetadata() {
   return {
@@ -48,12 +51,6 @@ export function getMetadata() {
 }
 
 export function getGeneratorConfig(assets) {
-  // SELECTION OF EFFECTS STACK
-  // 0 -> Monochrome dither
-  // 1 -> Tinted dither
-  // 2 -> Color dither + pixel sorting
-  // 3 -> Pixel sorting + color dither
-  // 4 -> Abstract dither
 
   // Looks like the only thing we're passing sketch around for is the random func...
   const fakeSketch = { random: (min, max) => {
@@ -78,21 +75,36 @@ export function getGeneratorConfig(assets) {
     }
   };
 
-  let effects_stack_weights = [ [0, 20], [1, 20], [2, 20], [3, 20], [4, 20] ]; // these represent probabilities for choosing an effects stack number [element, probability]
+  // SELECTION OF EFFECTS STACK
+  // 0 -> mono - monochrome dither
+  // 1 -> hi-fi - tinted dither
+  // 2 -> noisy - color dither + pixel sorting
+  // 3 -> corrupted - pixel sorting + color dither
+  // 4 -> lo-fi - abstract dither
+
+  let effects_stack_weights = [ [0, 15], [1, 15], [2, 30], [3, 30], [4, 10] ]; // these represent probabilities for choosing an effects stack number [element, probability]
   let effects_stack_type = weightedChoice(effects_stack_weights, fakeSketch); // type of effects workflow to be used as a number, 0-4
-  //let effects_stack_type = 4; // override for the type of effects workflow to be used as a number, 0-4
+  // effects_stack_type = 0; // override for the type of effects workflow to be used as a number, 0-4
+  let effects_stack_names = ['mono', 'hi-fi', 'noisy', 'corrupted', 'lo-fi'];
+  let effects_stack_name = effects_stack_names[effects_stack_type];
 
   // SELECTION OF SOURCE THEME
-  let source_themes = ['citizen', 'cityscape', 'covers', 'scenes'];
-  let source_theme_weights = [ [0, 35], [1, 35], [2, 25], [3, 5] ]; // these represent probabilities for choosing a source theme number [element, probability]
+  let source_themes = ['citizen', 'cityscape', 'cover', 'encounter'];
+  let source_theme_weights = [ [0, 40], [1, 40], [2, 15], [3, 5] ]; // these represent probabilities for choosing a source theme number [element, probability]
   let source_theme_nr = weightedChoice(source_theme_weights, fakeSketch); // 0 -> citizen, 1 -> cityscape, 2 -> covers, 3 -> scenes
-  //let source_theme_nr = 1; // override for the source theme
+  // source_theme_nr = 1; // override for the source theme
   let source_theme = source_themes[source_theme_nr]; // 'citizen', 'cityscape', 'covers', 'scenes'
 
   // EXCEPTIONS - these skew the choice probabilities from above
-  if (effects_stack_type == 4) {source_theme_nr = 0}; // Abstract dither effect stack works only with citizen theme
+  if (effects_stack_type == 4) {source_theme = 'citizen'}; // Abstract dither effect stack works only with citizen theme
 
+  // select a random image from a certain theme in the assets folder
   let imagePath = getRandomImagePath(assets, source_theme);
+
+  // add features
+  features['lot nr.'] = '000'; // binary number 0-7, there will be 8 lots in total, 32*8 = 256, so the lot numbers will be 000, 001, 010, 011, 100, 101, 110, 111
+  features['theme'] = source_theme;
+  features['effect'] = effects_stack_name;
 
   return {
     type: 'gif',
@@ -144,8 +156,7 @@ export async function draw(sketch, assets, params) {
   let image_border = [100, 100];
 
   let royalty_tally = {}
-  //Populate the features object like so, it is automatically exported.
-  features['Trait Name'] = "Trait Value";
+
 
   console.log("---Processing Starting---");
   let sketch_canvas = sketch.createCanvas(WIDTH + image_border[0], HEIGHT + image_border[1]);
@@ -166,6 +177,7 @@ export async function draw(sketch, assets, params) {
     referenceGraphic.copy(image, copyStartX, copyStartY, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT);
 
 
+    let effect_features;
 
     /***********IMAGE MANIPULATION GOES HERE**********/
     const effects = [ animateMonochromeDither, animateTintedDither, animateDitherSorting, animateSortingDither, animateAbstractDither ];
