@@ -367,7 +367,7 @@ export function randomListItem(list) {
 
 
 export function getRandomImagePath(assets, asset_Dir, sketch) {
-  return "assets/midjourney/" + asset_Dir + "/" + randomListItem(assets[asset_Dir]); // "assets/" + asset_Dir + "/" + randomListItem(assets[asset_Dir])
+  return "assets/" + asset_Dir + "/" + randomListItem(assets[asset_Dir]); // "assets/" + asset_Dir + "/" + randomListItem(assets[asset_Dir])
 }
 
 export async function getRandomImage(assets, asset_Dir, sketch) {
