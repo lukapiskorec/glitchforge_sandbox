@@ -11,6 +11,7 @@ function getRandomSeed() {
   // Use either for testing...
   let randomSeed = Math.random() + ""
   let constantSeed = "ADSFSEED"
+  console.log("seed: "+randomSeed);
   return randomSeed;
 }
 
@@ -19,7 +20,7 @@ function getRandomGenerator() {
 }
 
 function getAssetList() {
-  var assetPath = 'assets/'; // 'assets/'
+  var assetPath = 'assets/';
   var files = fs.readdirSync(assetPath);
   const assetFolders = files.filter(f => fs.lstatSync(assetPath + f).isDirectory() && !f.startsWith('.'));
   const assets = {}
@@ -42,9 +43,14 @@ async function main() {
   generator.init(seedrandom(seed), txn_hash);
   const assets = getAssetList();
   const generatorConfig = generator.getGeneratorConfig(assets);
-  console.dir(generatorConfig);
+  // console.dir(generatorConfig);
 
   const threads = [];
+
+  // TODO: This is super hacky, just here to populate features on luka's project
+  // FIXME: Remove me later, move features into getGeneratorConfig
+  await worker(txn_hash, assets, -1, seed);
+  fs.unlinkSync('frame--1.png');
 
   for (let frameNum = 0; frameNum < generatorConfig.frames; frameNum++) {
     if (generatorConfig.parallel) {
