@@ -89,7 +89,7 @@ export function getGeneratorConfig(assets) {
   let effects_stack_name = effects_stack_names[effects_stack_type];
 
   // SELECTION OF SOURCE THEME
-  let source_themes = ['citizen', 'cityscape', 'covers', 'encounter'];
+  let source_themes = ['citizen', 'cityscape', 'covers', 'encounters'];
   let source_theme_weights = [ [0, 40], [1, 40], [2, 15], [3, 5] ]; // these represent probabilities for choosing a source theme number [element, probability]
   let source_theme_nr = weightedChoice(source_theme_weights, fakeSketch); // 0 -> citizen, 1 -> cityscape, 2 -> covers, 3 -> scenes
   // source_theme_nr = 1; // override for the source theme
