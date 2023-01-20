@@ -275,7 +275,7 @@ export async function animateMonochromeDither(img, image_border, sketch, frameNu
       sketch.background(0);
       applyMonochromeDither(frame, image_border, new_brightness, contrast, pix_scaling, pix_scaling_dark, nr_of_levels, dither_params_1, dither_params_2, dither_params_3, mask_contrast, light_treshold, dark_treshold, invert_mask, tint_palette, layer_shift, sketch);
       // draw lot nr. symbol in the bottom right corner of the image, based on Fu Xi Bagua trigrams, binary numbering
-      addLotSymbol('000', frame, image_border, tint_palette, rgb, sketch);
+      addLotSymbol('001', frame, image_border, tint_palette, rgb, sketch);
       // draw quote from Neuromancer encoded in binary - only for those who have 'signal' feature
       if (signal_recieved) { addBinaryCode(rand_quote_string, img, image_border, tint_palette, rgb, frameNum, sketch); }
     }
@@ -327,7 +327,7 @@ export async function animateTintedDither(img, image_border, sketch, frameNum) {
       sketch.background(0);
       applyTintedDither(frame, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, tint_palette, layer_shift, sketch);
       // draw lot nr. symbol in the bottom right corner of the image, based on Fu Xi Bagua trigrams, binary numbering
-      addLotSymbol('000', frame, image_border, tint_palette, rgb, sketch);
+      addLotSymbol('001', frame, image_border, tint_palette, rgb, sketch);
       // draw quote from Neuromancer encoded in binary - only for those who have 'signal' feature
       if (signal_recieved) { addBinaryCode(rand_quote_string, img, image_border, tint_palette, rgb, frameNum, sketch); }
     }
@@ -391,7 +391,7 @@ export async function animateDitherSorting(img, image_border, sketch, frameNum) 
       sketch.background(0);
       applyDitherSorting(frame, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tint_palette_key, tint_palette, layer_shift, sketch);
       // draw lot nr. symbol in the bottom right corner of the image, based on Fu Xi Bagua trigrams, binary numbering
-      addLotSymbol('000', frame, image_border, tint_palette, rgb, sketch);
+      addLotSymbol('001', frame, image_border, tint_palette, rgb, sketch);
       // draw quote from Neuromancer encoded in binary - only for those who have 'signal' feature
       if (signal_recieved) { addBinaryCode(rand_quote_string, img, image_border, tint_palette, rgb, frameNum, sketch); }
     }
@@ -455,7 +455,7 @@ export async function animateSortingDither(img, image_border, sketch, frameNum) 
       sketch.background(0);
       applySortingDither(frame, image_border, new_brightness, contrast, pix_scaling, nr_of_levels, dither_params_1, dither_params_2, mask_contrast, light_treshold, invert_mask, blackValue, brigthnessValue, whiteValue, sorting_mode, sorting_type, sorting_order, color_noise_density, color_noise_bias, color_noise_variation, tint_palette_key, tint_palette, layer_shift, sketch);
       // draw lot nr. symbol in the bottom right corner of the image, based on Fu Xi Bagua trigrams, binary numbering
-      addLotSymbol('000', frame, image_border, tint_palette, rgb, sketch);
+      addLotSymbol('001', frame, image_border, tint_palette, rgb, sketch);
       // draw quote from Neuromancer encoded in binary - only for those who have 'signal' feature
       if (signal_recieved) { addBinaryCode(rand_quote_string, img, image_border, tint_palette, rgb, frameNum, sketch); }
     }
@@ -536,7 +536,7 @@ export async function animateAbstractDither(img, image_border, sketch, frameNum)
       // looks like frame changes size after we run it through effects above, so we need to recreate a temp object just to hold original frame dimensions
       let fakeFrame = {width:900, height:900};
       // draw lot nr. symbol in the bottom right corner of the image, based on Fu Xi Bagua trigrams, binary numbering
-      addLotSymbol('000', fakeFrame, image_border, tint_palette, rgb, sketch);
+      addLotSymbol('001', fakeFrame, image_border, tint_palette, rgb, sketch);
       // draw quote from Neuromancer encoded in binary - only for those who have 'signal' feature
       if (signal_recieved) { addBinaryCode(rand_quote_string, img, image_border, tint_palette, rgb, frameNum, sketch); }
     }

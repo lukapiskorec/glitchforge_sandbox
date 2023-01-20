@@ -89,20 +89,21 @@ export function getGeneratorConfig(assets) {
   let effects_stack_name = effects_stack_names[effects_stack_type];
 
   // SELECTION OF SOURCE THEME
-  let source_themes = ['citizen', 'cityscape', 'covers', 'encounters'];
-  let source_theme_weights = [ [0, 40], [1, 40], [2, 15], [3, 5] ]; // these represent probabilities for choosing a source theme number [element, probability]
-  let source_theme_nr = weightedChoice(source_theme_weights, fakeSketch); // 0 -> citizen, 1 -> cityscape, 2 -> covers, 3 -> scenes
+  //let source_themes = ['citizen', 'cityscape', 'covers', 'encounters']; // lot nr. 000
+  let source_themes = ['governor', 'organic', 'capital district', 'factory'];
+  let source_theme_weights = [ [0, 25], [1, 25], [2, 25], [3, 25] ]; // these represent probabilities for choosing a source theme number [element, probability]
+  let source_theme_nr = weightedChoice(source_theme_weights, fakeSketch); // 0 -> governors, 1 -> organics, 2 -> capital district, 3 -> factories
   // source_theme_nr = 1; // override for the source theme
-  let source_theme = source_themes[source_theme_nr]; // 'citizen', 'cityscape', 'covers', 'scenes'
+  let source_theme = source_themes[source_theme_nr]; // 'governors', 'organics', 'capital district', 'factories'
 
   // EXCEPTIONS - these skew the choice probabilities from above
-  if (effects_stack_type == 4) {source_theme = 'citizen'}; // Abstract dither effect stack works only with citizen theme
+  //if (effects_stack_type == 4) {source_theme = 'citizen'}; // Abstract dither effect stack works only with citizen theme
 
   // select a random image from a certain theme in the assets folder
   let imagePath = getRandomImagePath(assets, source_theme);
 
   // add features
-  features['lot nr.'] = '000'; // binary number 0-7, there will be 8 lots in total, 32*8 = 256, so the lot numbers will be 000, 001, 010, 011, 100, 101, 110, 111
+  features['lot nr.'] = '001'; // binary number 0-7, there will be 8 lots in total, 32*8 = 256, so the lot numbers will be 000, 001, 010, 011, 100, 101, 110, 111
   features['theme'] = source_theme;
   features['effect'] = effects_stack_name;
 
