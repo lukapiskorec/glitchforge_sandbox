@@ -19,7 +19,7 @@ for Glitch Forge, 2022
 import { getRandomImagePath } from "./util.js";
 import { calculateRoyalties } from "./royalties.js";
 import { sliceFrame, init as eInit } from "./effects/tartaria.js";
-import { weightedChoice, animateMonochromeDither, animateTintedDither, animateDitherSorting, animateSortingDither, animateAbstractDither } from "./effects/protocell_labs.js";
+import { LOT_NR, weightedChoice, animateMonochromeDither, animateTintedDither, animateDitherSorting, animateSortingDither, animateAbstractDither } from "./effects/protocell_labs.js";
 
 var r; //assign random hash access
 var WIDTH; var HEIGHT;
@@ -90,7 +90,7 @@ export function getGeneratorConfig(assets) {
 
   // SELECTION OF SOURCE THEME
   //let source_themes = ['citizen', 'cityscape', 'covers', 'encounters']; // lot nr. 000
-  let source_themes = ['governor', 'organic', 'capital district', 'factory', 'cosmos neo geographic', 'eldritch pulp fiction', 'tech noir', 'zealot'];
+  let source_themes = ['governor', 'organic', 'capital_district', 'factory', 'cosmos_neo_geographic', 'eldritch_pulp_fiction', 'tech_noir', 'zealot'];
   let source_theme_weights = [ [0, 24], [1, 24], [2, 24], [3, 24], [4, 1], [5, 1], [6, 1], [7, 1] ]; // these represent probabilities for choosing a source theme number [element, probability]
   let source_theme_nr = weightedChoice(source_theme_weights, fakeSketch); // 0 -> governors, 1 -> organics, 2 -> capital district, 3 -> factories
   // source_theme_nr = 1; // override for the source theme
@@ -103,7 +103,7 @@ export function getGeneratorConfig(assets) {
   let imagePath = getRandomImagePath(assets, source_theme);
 
   // add features
-  features['lot nr.'] = '001'; // binary number 0-7, there will be 8 lots in total, 32*8 = 256, so the lot numbers will be 000, 001, 010, 011, 100, 101, 110, 111
+  features['lot nr.'] = LOT_NR; // binary number 0-7, there will be 8 lots in total, 32*8 = 256, so the lot numbers will be 000, 001, 010, 011, 100, 101, 110, 111
   features['theme'] = source_theme;
   features['effect'] = effects_stack_name;
 
