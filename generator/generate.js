@@ -90,8 +90,8 @@ export function getGeneratorConfig(assets) {
 
   // SELECTION OF SOURCE THEME
   //let source_themes = ['citizen', 'cityscape', 'covers', 'encounters']; // lot nr. 000
-  let source_themes = ['governor', 'organic', 'capital district', 'factory'];
-  let source_theme_weights = [ [0, 25], [1, 25], [2, 25], [3, 25] ]; // these represent probabilities for choosing a source theme number [element, probability]
+  let source_themes = ['governor', 'organic', 'capital district', 'factory', 'cosmos neo geographic', 'eldritch pulp fiction', 'tech noir', 'zealot'];
+  let source_theme_weights = [ [0, 24], [1, 24], [2, 24], [3, 24], [4, 1], [5, 1], [6, 1], [7, 1] ]; // these represent probabilities for choosing a source theme number [element, probability]
   let source_theme_nr = weightedChoice(source_theme_weights, fakeSketch); // 0 -> governors, 1 -> organics, 2 -> capital district, 3 -> factories
   // source_theme_nr = 1; // override for the source theme
   let source_theme = source_themes[source_theme_nr]; // 'governors', 'organics', 'capital district', 'factories'
